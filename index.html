@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning a Message</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Use Lucide CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        /**
+         * Fixed Icon Component
+         * Uses lucide.createIcons to render icons into a ref container.
+         */
+        const Icon = ({ name, className }) => {
+            const containerRef = useRef(null);
+            
+            useEffect(() => {
+                if (window.lucide && containerRef.current) {
+                    // Clear previous content
+                    containerRef.current.innerHTML = '';
+                    
+                    // Convert PascalCase/camelCase to kebab-case (e.g., PlusCircle -> plus-circle)
+                    const kebabName = name
+                        .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+                        .toLowerCase();
+
+                    // Create the icon element
+                    const iconEl = document.createElement('i');
+                    iconEl.setAttribute('data-lucide', kebabName);
+                    if (className) iconEl.className = className;
+                    
+                    containerRef.current.appendChild(iconEl);
+                    
+                    // Initialize the icon
+                    window.lucide.createIcons({
+                        icons: window.lucide.icons,
+                        nameAttr: 'data-lucide'
+                    });
+                }
+            }, [name, className]);
+
+            return <span ref={containerRef} className="inline-flex items-center justify-center" />;
+        };
+
+        const App = () => {
+            const [activeStep, setActiveStep] = useState(1);
+
+            const steps = [
+                {
+                    id: 1,
+                    title: "Step 1: Accessing Automations",
+                    icon: "PlusCircle",
+                    color: "text-emerald-600",
+                    description: "Unlike standard shortcuts, planned messages are built within the Automation tab to ensure they trigger at a specific time.",
+                    actions: [
+                        {
+                            label: "Open Shortcuts & Navigate",
+                            detail: "Open the Shortcuts app. If you are inside an existing shortcut, tap the back arrow in the top left to reach the main menu. Then, tap the 'Automation' icon at the bottom center of the screen."
+                        },
+                        {
+                            label: "Start New Automation",
+                            detail: "Tap the '+' (plus) icon in the top right corner. From the list of triggers, select 'Time of Day'. This is the foundation for your scheduled message."
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "Step 2: Scheduling the Time",
+                    icon: "Clock",
+                    color: "text-indigo-600",
+                    description: "Define exactly when the message should be sent. Since this is a one-time event, we use a specific repeat setting.",
+                    actions: [
+                        {
+                            label: "Set Time and Frequency",
+                            detail: "Pick the exact time you want the message to go out. Under the 'Repeat' section, select 'Monthly'—this is a common workaround to prevent the message from sending every single day."
+                        },
+                        {
+                            label: "Enable Background Execution",
+                            detail: "Change the selection from 'Run After Confirmation' to 'Run Immediately'. This ensures the message sends without requiring you to tap a notification, which is vital if you are in a lecture or asleep."
+                        },
+                        {
+                            label: "Proceed to Logic",
+                            detail: "Tap 'Next' in the top right corner, then select 'New Blank Automation' to start building the actual WhatsApp action."
+                        }
+                    ]
+                },
+                {
+                    id: 3,
+                    title: "Step 3: Building the Message",
+                    icon: "MessageSquare",
+                    color: "text-blue-600",
+                    description: "Now you will connect the automation to the WhatsApp application to deliver your content.",
+                    actions: [
+                        {
+                            label: "Find the WhatsApp Action",
+                            detail: "In the search bar at the bottom, type 'WhatsApp'. Tap on the WhatsApp icon and then select the 'Send Message' action from the list."
+                        },
+                        {
+                            label: "Input Content and Recipient",
+                            detail: "Tap the blue 'Message' text to type your specific note. Then, tap 'Recipients' and search for the contact or group chat you wish to target."
+                        },
+                        {
+                            label: "Finalize the Build",
+                            detail: "Tap the 'Done' checkmark in the top right corner. Your automation is now live and waiting for the scheduled time."
+                        }
+                    ]
+                },
+                {
+                    id: 4,
+                    title: "Step 4: Housekeeping (After Sending)",
+                    icon: "Trash2",
+                    color: "text-rose-600",
+                    description: "Once the scheduled time has passed, you should verify the task before cleaning up your automation list.",
+                    actions: [
+                        {
+                            label: "Verification",
+                            detail: "Check your WhatsApp chat to ensure the message appears with the correct timestamp. This confirms the automation executed as planned before you remove the trigger logic."
+                        },
+                        {
+                            label: "Delete the Automation",
+                            detail: "Return to the 'Automation' tab in the Shortcuts app. Since this method uses a repeating trigger (Monthly), swipe left on the automation you created and tap 'Delete' to prevent future accidental sends."
+                        }
+                    ]
+                }
+            ];
+
+            const current = steps[activeStep - 1];
+
+            return (
+                <div className="min-h-screen p-4 md:p-8">
+                    <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+                        <div className="bg-slate-900 p-8 text-white">
+                            <div className="flex items-center gap-3 mb-2">
+                                <Icon name="Edit3" className="w-8 h-8 text-emerald-400" />
+                                <h1 className="text-2xl font-bold tracking-tight">Planning a Message</h1>
+                            </div>
+                            <p className="text-slate-400 text-sm md:text-base leading-relaxed">
+                                A precise, 10-step walkthrough for scheduling one-off messages. 
+                                Ideal for sending a message at a specific time when you know you will be busy with other tasks, such as studying or sleeping.
+                            </p>
+                        </div>
+
+                        <div className="flex border-b border-slate-200 overflow-x-auto bg-slate-50/50">
+                            {steps.map((step) => (
+                                <button
+                                    key={step.id}
+                                    onClick={() => setActiveStep(step.id)}
+                                    className={`flex-1 px-4 py-4 text-xs font-bold transition-all whitespace-nowrap border-b-2 flex flex-col items-center gap-1 ${
+                                        activeStep === step.id 
+                                            ? 'border-emerald-600 text-emerald-600 bg-white' 
+                                            : 'border-transparent text-slate-400 hover:text-slate-600'
+                                    }`}
+                                >
+                                    <span className="uppercase tracking-widest text-[10px] opacity-60">Phase {step.id}</span>
+                                    {step.title.split(': ')[1]}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="p-6 md:p-10 min-h-[450px]">
+                            <div className="flex items-start gap-4 mb-8">
+                                <div className="p-3 bg-slate-100 rounded-xl shadow-inner flex items-center justify-center">
+                                    <Icon name={current.icon} className={`w-6 h-6 ${current.color}`} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-900">{current.title}</h2>
+                                    <p className="text-slate-600 mt-1 max-w-2xl leading-relaxed">{current.description}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid gap-6">
+                                {current.actions.map((action, index) => (
+                                    <div key={index} className="group flex gap-5">
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 font-bold text-sm border border-slate-100 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                                                {index + 1}
+                                            </div>
+                                            {index !== current.actions.length - 1 && (
+                                                <div className="w-0.5 h-full bg-slate-100 my-2" />
+                                            )}
+                                        </div>
+                                        <div className="pb-6">
+                                            <h3 className="font-bold text-slate-800 text-lg mb-1">{action.label}</h3>
+                                            <p className="text-slate-600 leading-relaxed text-sm md:text-base">
+                                                {action.detail}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="mt-8 flex justify-between items-center pt-8 border-t border-slate-100">
+                                <button 
+                                    disabled={activeStep === 1}
+                                    onClick={() => setActiveStep(prev => prev - 1)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                                        activeStep === 1 ? 'text-slate-300 cursor-not-allowed' : 'text-emerald-600 hover:bg-emerald-50'
+                                    }`}
+                                >
+                                    Back
+                                </button>
+                                <button 
+                                    disabled={activeStep === steps.length}
+                                    onClick={() => setActiveStep(prev => prev + 1)}
+                                    className={`px-6 py-2 rounded-xl font-bold text-white transition-all flex items-center gap-2 ${
+                                        activeStep === steps.length ? 'bg-slate-300 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 shadow-lg'
+                                    }`}
+                                >
+                                    {activeStep === steps.length ? 'Guide Complete' : 'Next Phase'}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="bg-emerald-950 p-6 text-emerald-100">
+                            <div className="flex gap-4 items-start">
+                                <div className="bg-emerald-500/20 p-2 rounded-lg flex items-center justify-center">
+                                    <Icon name="Bell" className="w-5 h-5 text-emerald-400" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold text-white uppercase tracking-widest mb-1">Administrative Alert</p>
+                                    <p className="text-sm leading-relaxed opacity-80">
+                                        Because this automation is set to 'Monthly', it will try to send the same message at the same time next month if you don't perform the deletion step. Think of this as a 'Manual Override'—it’s powerful for one-off tasks, but requires you to close the loop manually to maintain a clean system.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
